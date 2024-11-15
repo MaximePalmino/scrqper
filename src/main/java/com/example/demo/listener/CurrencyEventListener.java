@@ -2,7 +2,6 @@ package com.example.demo.listener;
 
 import com.example.demo.entity.Currencies;
 import com.example.demo.service.CurrencyService;
-import jakarta.persistence.PostPersist;
 import jakarta.persistence.PostRemove;
 import jakarta.persistence.PostUpdate;
 import jakarta.persistence.PrePersist;
@@ -11,30 +10,33 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CurrencyEventListener {
+    private final CurrencyService currencyService;
 
-    private CurrencyService currencyService;
-
-    // No-argument constructor
     public CurrencyEventListener() {
+        this(null);
     }
 
-    // Setter method for dependency injection
     @Autowired
-    public void setCurrencyService(CurrencyService currencyService) {
+    public CurrencyEventListener(CurrencyService currencyService) {
         this.currencyService = currencyService;
     }
 
     @PrePersist
     public void prePersist(Currencies currencies) {
-        System.out.println(currencies);
+        System.out.println("Currency created: " + currencies);
     }
 
-    @PostPersist
     @PostUpdate
-    @PostRemove
     public void onPostUpdate(Currencies currency) {
-        System.out.println(currency);
-        System.out.println("Hello World");
+        System.out.println("Currency updated: " + currency);
+        if (currencyService != null) {
+            currencyService.notifyCurrencyChange(currency);
+        }
+    }
+
+    @PostRemove
+    public void onPostRemove(Currencies currency) {
+        System.out.println("Currency deleted: " + currency);
         if (currencyService != null) {
             currencyService.notifyCurrencyChange(currency);
         }

@@ -10,7 +10,6 @@ import java.util.List;
 
 @Service
 public class CurrencyService {
-
     private final CurrenciesRepository currencyRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -21,18 +20,29 @@ public class CurrencyService {
     }
 
     public void saveCurrency(Currencies currency) {
+        System.out.println("Currency created: " + currency);
         currencyRepository.save(currency);
+        notifyCurrencyChange(currency);
+    }
+
+    public void updateCurrency(Currencies currency) {
+        System.out.println("Currency updated: " + currency);
+        currencyRepository.save(currency);
+        notifyCurrencyChange(currency);
+    }
+
+    public void deleteCurrency(Currencies currency) {
+        System.out.println("Currency deleted: " + currency);
+        currencyRepository.delete(currency);
+        notifyCurrencyChange(currency);
     }
 
     public List<Currencies> getAllCurrencies() {
         return currencyRepository.findAll();
     }
 
-    public List<Currencies> notifyCurrencyChange(Currencies currency) {
-        List<Currencies> currencies = getAllCurrencies();
-        System.out.println(currencies);
-        System.out.println("CASE 1 :)");
-        return currencies;
-//        messagingTemplate.convertAndSend("/topic/currency", currencies);
+    public void notifyCurrencyChange(Currencies currency) {
+        // Send the updated currency to all connected WebSocket clients
+        messagingTemplate.convertAndSend("/topic/currency", currency);
     }
 }

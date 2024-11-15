@@ -2,10 +2,12 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import com.example.demo.listener.CurrencyEventListener;
+import org.springframework.beans.factory.annotation.Configurable;
 
 @Entity
 @EntityListeners(CurrencyEventListener.class)
 @Table(name = "currencies")
+@Configurable
 public class Currencies {
 
     @Id
