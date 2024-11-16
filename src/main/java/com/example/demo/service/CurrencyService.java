@@ -10,6 +10,7 @@ import java.util.List;
 
 @Service
 public class CurrencyService {
+
     private final CurrenciesRepository currencyRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -20,29 +21,91 @@ public class CurrencyService {
     }
 
     public void saveCurrency(Currencies currency) {
-        System.out.println("Currency created: " + currency);
         currencyRepository.save(currency);
-        notifyCurrencyChange(currency);
+        notifyCurrencyChange("INSERT", currency);
     }
 
     public void updateCurrency(Currencies currency) {
-        System.out.println("Currency updated: " + currency);
         currencyRepository.save(currency);
-        notifyCurrencyChange(currency);
+        notifyCurrencyChange("UPDATE", currency);
     }
 
     public void deleteCurrency(Currencies currency) {
-        System.out.println("Currency deleted: " + currency);
         currencyRepository.delete(currency);
-        notifyCurrencyChange(currency);
+        notifyCurrencyChange("DELETE", currency);
     }
 
     public List<Currencies> getAllCurrencies() {
         return currencyRepository.findAll();
     }
 
-    public void notifyCurrencyChange(Currencies currency) {
-        // Send the updated currency to all connected WebSocket clients
-        messagingTemplate.convertAndSend("/topic/currency", currency);
+    private void notifyCurrencyChange(String operation, Currencies currency) {
+        // Create a DTO for WebSocket notification
+        CurrencyUpdate update = new CurrencyUpdate(
+                operation,
+                currency.getId(),
+                currency.getName(),
+                currency.getSymbol(),
+                System.currentTimeMillis()
+        );
+        messagingTemplate.convertAndSend("/topic/currency", update);
+    }
+
+    // Inner DTO class for WebSocket notifications
+    public static class CurrencyUpdate {
+        private String operation;
+        private String id;
+        private String name;
+        private String symbol;
+        private long timestamp;
+
+        public CurrencyUpdate(String operation, String id, String name, String symbol, long timestamp) {
+            this.operation = operation;
+            this.id = id;
+            this.name = name;
+            this.symbol = symbol;
+            this.timestamp = timestamp;
+        }
+
+        // Getters and setters
+        public String getOperation() {
+            return operation;
+        }
+
+        public void setOperation(String operation) {
+            this.operation = operation;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getSymbol() {
+            return symbol;
+        }
+
+        public void setSymbol(String symbol) {
+            this.symbol = symbol;
+        }
+
+        public long getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(long timestamp) {
+            this.timestamp = timestamp;
+        }
     }
 }
