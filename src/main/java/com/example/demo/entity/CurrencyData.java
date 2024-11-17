@@ -1,10 +1,12 @@
 package com.example.demo.entity;
 
+import com.example.demo.listener.DatabaseListenerService;
 import jakarta.persistence.*;
 
 import java.util.Date;
 
 @Entity
+@EntityListeners(DatabaseListenerService.class)
 @Table(name = "currency_data")
 public class CurrencyData {
 
@@ -16,13 +18,10 @@ public class CurrencyData {
     @Column(name = "price")
     private float price;
     @Column(name = "market_cap")
-
     private float marketCap;
     @Column(name = "updated_at")
-
     private Date updatedAt;
     @Column(name = "source")
-
     private String source;
     @Column(name = "trust_factor")
     private float trustFactor;
